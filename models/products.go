@@ -22,7 +22,7 @@ var (
 )
 
 
-func Init() {
+func init() {
 	err := validate.RegisterValidation("sku", validateSKU)
 	if err != nil {
 		panic(err)
@@ -49,7 +49,6 @@ func (p *Product) Validate() error {
 func validateSKU(fl validator.FieldLevel) bool {
 	return skuRegexp.MatchString(fl.Field().String())
 }
-
 
 // Products is a slice of Product pointers
 type Products []*Product
