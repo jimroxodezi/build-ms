@@ -1,0 +1,68 @@
+basePath: /products
+consumes:
+    - application/json
+definitions:
+    Product:
+        properties:
+            description:
+                type: string
+                x-go-name: Description
+            id:
+                format: int64
+                type: integer
+                x-go-name: ID
+            name:
+                type: string
+                x-go-name: Name
+            price:
+                format: float
+                type: number
+                x-go-name: Price
+            sku:
+                type: string
+                x-go-name: SKU
+        type: object
+        x-go-package: _/home/jimrox/projects/go-projects/build-ms/models
+host: localhost:9090
+info:
+    contact:
+        email: jimrox@example.com
+        name: Jim Rox
+    description: Documentation for product API.
+    license:
+        name: MIT
+        url: http://opensource.org/licenses/MIT
+    title: Product API
+    version: 1.0.0
+paths:
+    /products:
+        get:
+            operationId: listProducts
+            responses:
+                "200":
+                    $ref: '#/responses/productsResponse%7D'
+            summary: Returns a list of products.
+            tags:
+                - products
+        post:
+            operationId: addProduct
+            responses:
+                "201":
+                    $ref: '#/responses/noContentResponse'
+            summary: Adds a new product to the list.
+            tags:
+                - products
+    /products/{id}:
+        put:
+            operationId: updateProduct
+            responses:
+                "204":
+                    $ref: '#/responses/noContentResponse'
+            summary: Updates an existing product in the list.
+            tags:
+                - products
+produces:
+    - application/json
+schemes:
+    - http
+swagger: "2.0"
