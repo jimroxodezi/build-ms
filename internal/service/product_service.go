@@ -4,14 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/jimroxodezi/build-ms/models"
-	"github.com/jimroxodezi/build-ms/repository"
+	"github.com/jimroxodezi/build-ms/internal/models"
+	"github.com/jimroxodezi/build-ms/internal/repository"
 )
-
-// type ProductService interface {
-// 	CreateProduct(ctx context.Context, product repository.ProductRepository) error
-// 	GetProducts(ctx context.Context) ([]*repository.ProductRepository, error)
-// }
 
 type ProductService struct {
 	productRepo repository.ProductRepository
@@ -22,17 +17,26 @@ func NewProductService(repo repository.ProductRepository) *ProductService {
 }
 
 func (s *ProductService) CreateProduct(ctx context.Context, product models.Product) error {
-	product.CreatedOn = time.Now()
 	if err := product.Validate(); err != nil {
 		return err
 	}
+	product.CreatedOn = time.Now()
 	return s.productRepo.CreateProduct(product)
 }
 
+// 
+func (s *ProductService) GetProduct(ctx context.Context, id int) (*models.Product, error) {
+	return s.productRepo.FindProduct(id)
+}
+
 func (s *ProductService) GetProducts(ctx context.Context) ([]*models.Product, error) {
-	return s.productRepo.FindAllProducts()
+	return s.productRepo.FindProducts()
 }
 
 func (s *ProductService) UpdateProduct(ctx context.Context, id int, product models.Product) error {
+	if err := product.Validate(); err != nil {
+		return err
+	}
+	product.UpdatedOn = time.Now()
 	return s.productRepo.UpdateProduct(id, &product)
 }

@@ -13,21 +13,21 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jimroxodezi/build-ms/models"
-	"github.com/jimroxodezi/build-ms/service"
+	"github.com/jimroxodezi/build-ms/internal/models"
+	"github.com/jimroxodezi/build-ms/internal/service"
 	"github.com/go-chi/chi/v5"
 )
 
-// Products is the handler for products
+// ProductHandler is the handler for products
 // we use a service layer to handle the business logic
-type Products struct {
+type ProductHandler struct {
 	s service.ProductService
 	l *log.Logger
 }
 
-// 
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l: l}
+// NewProductHandler creates a new ProductHandler
+func NewProductHandler(l *log.Logger) *ProductHandler {
+	return &ProductHandler{l: l}
 }
 
 // swagger:route GET /products products listProducts
@@ -36,7 +36,7 @@ func NewProducts(l *log.Logger) *Products {
 // responses:
 //   200: productsResponse}
 // GetProducts returns the list of products
-func (p *Products) GetProducts(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	
 	// p.l.Println("Handle GET products")
@@ -50,13 +50,36 @@ func (p *Products) GetProducts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetProduct returns a single product by ID
+func (p *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	w.Header().Set("Content-Type", "application/json")
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		WriteError(w, http.StatusBadRequest, "Invalid product ID")
+		return
+	}
+	product, err := p.s.GetProduct(ctx, id)
+	if err != nil {
+		WriteError(w, http.StatusNotFound, "Product not found")
+		return
+	}
+	err = json.NewEncoder(w).Encode(product)
+	if err != nil {
+		WriteError(w, http.StatusInternalServerError, "Error marshaling product")
+		return
+	}
+}
+
+
+
 // swagger:route POST /products products addProduct
 // Adds a new product to the list.
 //
 // responses:
 //   201: noContentResponse
 // AddProduct adds a new product to the list
-func (p *Products) AddProduct(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) AddProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	w.Header().Set("Content-Type", "application/json")
 	var product models.Product
@@ -86,19 +109,19 @@ func (p *Products) AddProduct(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   204: noContentResponse
 // UpdateProducts updates an existing product in the list
-func (p *Products) UpdateProducts(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) UpdateProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		// http.Error(w, "Error parsing product id", http.StatusBadRequest)
-		WriteError(w, http.StatusBadRequest, "Error parsing product id")
+		WriteError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 	
 	product := models.Product{}
 	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		http.Error(w, "Error unmarshaling product", http.StatusBadRequest)
+		WriteError(w, http.StatusBadRequest, "Error unmarshaling product")
 		return
 	}
 

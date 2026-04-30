@@ -3,15 +3,15 @@ package repository
 import (
 	"time"
 
-	"github.com/jimroxodezi/build-ms/models"
+	"github.com/jimroxodezi/build-ms/internal/models"
 )
 
 type ProductRepository interface {
 	CreateProduct(product models.Product) error
 	UpdateProduct(id int, p *models.Product) error
 	DeleteProduct(id int) error
-	GetProduct(id int) (*models.Product, error)
-	FindAllProducts() ([]*models.Product, error)
+	FindProduct(id int) (*models.Product, error)
+	FindProducts() ([]*models.Product, error)
 }
 
 
@@ -55,8 +55,16 @@ func (r *InMemoryProductRepository) UpdateProduct(id int, p *models.Product) err
 }
 
 // FindProduct finds a product by its ID and returns it.
-func (r *InMemoryProductRepository) GetProduct(id int) (*models.Product, error) {
+func (r *InMemoryProductRepository) FindProduct(id int) (*models.Product, error) {
 	return r.findProduct(id)
+}
+
+func (r *InMemoryProductRepository) FindProducts() ([]*models.Product, error) {
+	products := make([]*models.Product, 0, len(r.productStore))
+	for _, p := range r.productStore {
+		products = append(products, p)
+	}
+	return products, nil
 }
 
 func (r *InMemoryProductRepository) findProduct(id int) (*models.Product, error) {
@@ -67,13 +75,3 @@ func (r *InMemoryProductRepository) findProduct(id int) (*models.Product, error)
 
 	return p, nil
 }
-
-func (r *InMemoryProductRepository) FindAllProducts() ([]*models.Product, error) {
-	products := make([]*models.Product, 0, len(r.productStore))
-	for _, p := range r.productStore {
-		products = append(products, p)
-	}
-	return products, nil
-}
-
-// productStore := NewInMemoryProductRepository()

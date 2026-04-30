@@ -27,7 +27,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jimroxodezi/build-ms/handlers"
+	"github.com/jimroxodezi/build-ms/internal/handlers"
 	"github.com/go-chi/chi/v5"
     "github.com/go-chi/chi/v5/middleware"
 )
@@ -41,8 +41,9 @@ func main() {
 
 	productRouter := chi.NewRouter()
 
-	ph := handlers.NewProducts(logger)
+	ph := handlers.NewProductHandler(logger)
 	
+	productRouter.Get("/products/{id}", ph.GetProduct)
 	productRouter.Get("/products", ph.GetProducts)
 	productRouter.Post("/products", ph.AddProduct)
 	productRouter.Put("/products/{id}", ph.UpdateProducts)
